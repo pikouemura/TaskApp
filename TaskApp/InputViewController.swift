@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class InputViewController: UIViewController {
+class InputViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDelegate {
     @IBOutlet weak var titleTextField: UITextField!
     @IBOutlet weak var contentsTextView: UITextView!
     @IBOutlet weak var categoryTextField: UITextField!
@@ -18,6 +18,8 @@ class InputViewController: UIViewController {
     let realm = try! Realm()
     var task:Task!
     
+    var categoryAry:[String] = []
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -25,8 +27,15 @@ class InputViewController: UIViewController {
         let tapGesture: UITapGestureRecognizer = UITapGestureRecognizer(target:self, action:"dismissKeyboard")
         self.view.addGestureRecognizer(tapGesture)
         
+        //カテゴリ一覧取得
+        getAllCategory()
+        
+        var pickerView = UIPickerView()
+        pickerView.delegate = self
+        categoryTextField.inputView = pickerView
+        
         titleTextField.text = task.title
-        categoryTextField.text = task.category
+//        categoryTextField.text = task.category
         contentsTextView.text = task.contents
         datePicker.date = task.date
         
@@ -36,7 +45,7 @@ class InputViewController: UIViewController {
     override func viewWillDisappear(animated: Bool) {
         try! realm.write {
             self.task.title = self.titleTextField.text!
-            self.task.category = self.categoryTextField.text!
+//            self.task.category = self.categoryTextField.text!
             self.task.contents = self.contentsTextView.text
             self.task.date = self.datePicker.date
             self.realm.add(self.task, update: true)
@@ -78,6 +87,27 @@ class InputViewController: UIViewController {
         notification.userInfo = ["id":task.id]
         UIApplication.sharedApplication().scheduleLocalNotification(notification)
         
+    }
+    
+    func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return categoryAry.count
+    }
+    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return categoryAry[row]
+    }
+    func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        categoryTextField.text = categoryAry[row]
+    }
+    
+    func getAllCategory() {
+        for _category in try! Realm().objects(Category).sorted("id", ascending: false) {
+            print(categoryAry)
+            print(_category.name)
+            categoryAry.append(_category.name)
+        }
     }
 
     /*

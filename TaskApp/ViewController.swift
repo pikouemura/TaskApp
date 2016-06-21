@@ -9,13 +9,17 @@
 import UIKit
 import RealmSwift
 
-class ViewController: UIViewController,UITableViewDelegate, UITableViewDataSource {
+class ViewController: UIViewController,UITableViewDelegate, UITableViewDataSource , UIPickerViewDataSource, UIPickerViewDelegate {
     @IBOutlet weak var categoryTextField: UITextField!
 
     @IBOutlet weak var tableView: UITableView!
     
     // Realmインスタンスを取得する
     let realm = try! Realm()  // ←追加
+    //カテゴリ一覧
+    var categoryAry:[String] = [""]
+    var categoryIdAry:[Int] = [0]
+    var categoryId:Int = 0;
     
     // DB内のタスクが格納されるリスト。
     // 日付近い順\順でソート：降順
@@ -26,6 +30,17 @@ class ViewController: UIViewController,UITableViewDelegate, UITableViewDataSourc
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         tableView.rowHeight = 50
+        
+        // 背景をタップしたらdismissKeyboardメソッドを呼ぶように設定する
+        let tapGesture: UITapGestureRecognizer = UITapGestureRecognizer(target:self, action:"dismissKeyboard")
+        self.view.addGestureRecognizer(tapGesture)
+        
+        //カテゴリ一覧取得
+        getAllCategory()
+        
+        var pickerView = UIPickerView()
+        pickerView.delegate = self
+        categoryTextField.inputView = pickerView
     }
 
     override func didReceiveMemoryWarning() {
@@ -110,6 +125,11 @@ class ViewController: UIViewController,UITableViewDelegate, UITableViewDataSourc
         super.viewWillAppear(animated)
         tableView.reloadData()
     }
+    
+    func dismissKeyboard(){
+        // キーボードを閉じる
+        view.endEditing(true)
+    }
     //絞り込みボタン
     @IBAction func search(sender: AnyObject) {
         let word:String! = categoryTextField.text
@@ -117,6 +137,33 @@ class ViewController: UIViewController,UITableViewDelegate, UITableViewDataSourc
         
         tableView.reloadData()
         
+    }
+    
+    func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return categoryAry.count
+    }
+    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return categoryAry[row]
+    }
+    func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        categoryTextField.text = categoryAry[row]
+        
+        //カテゴリID取得
+        categoryId = categoryIdAry[row]
+        print(categoryId)
+        //タスクをカテゴリで絞り込み
+        taskArray = try! Realm().objects(Task).filter("category_id == "+String(categoryId)+" ").sorted("date", ascending: false)
+        
+        tableView.reloadData()
+    }
+    func getAllCategory() {
+        for _category in try! Realm().objects(Category).sorted("id", ascending: false) {
+            categoryAry.append(_category.name)
+            categoryIdAry.append(_category.id)
+        }
     }
 }
 
