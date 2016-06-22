@@ -16,6 +16,9 @@ class ViewController: UIViewController,UITableViewDelegate, UITableViewDataSourc
     
     // Realmインスタンスを取得する
     let realm = try! Realm()  // ←追加
+    
+    var keyboardShowFlag:Bool = false;
+    
     //カテゴリ一覧
     var categoryAry:[String] = [""]
     var categoryIdAry:[Int] = [0]
@@ -33,8 +36,14 @@ class ViewController: UIViewController,UITableViewDelegate, UITableViewDataSourc
         tableView.dataSource = self
         tableView.rowHeight = 50
         
+        
+        //キーボードの開閉イベント取得
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "KeyboardDidShow:", name: UIKeyboardDidShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "KeyboardDidHide:", name: UIKeyboardDidHideNotification, object: nil)
+        
         // 背景をタップしたらdismissKeyboardメソッドを呼ぶように設定する
         let tapGesture: UITapGestureRecognizer = UITapGestureRecognizer(target:self, action:"dismissKeyboard")
+        tapGesture.cancelsTouchesInView = false;
         self.view.addGestureRecognizer(tapGesture)
         
         //カテゴリ一覧取得
@@ -77,8 +86,9 @@ class ViewController: UIViewController,UITableViewDelegate, UITableViewDataSourc
     // MARK: UITableViewDelegateプロトコルのメソッド
     // 各セルを選択した時に実行されるメソッド
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        print("didSelectRowAtIndexPath")
-        performSegueWithIdentifier("cellSegue",sender: nil) // ←追加する
+        if(!keyboardShowFlag) {
+            performSegueWithIdentifier("cellSegue",sender: nil) // ←追加する
+        }
     }
     
     // セルが削除が可能なことを伝えるメソッド
@@ -109,13 +119,11 @@ class ViewController: UIViewController,UITableViewDelegate, UITableViewDataSourc
     // segue で画面遷移するに呼ばれる
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?){
         let inputViewController:InputViewController = segue.destinationViewController as! InputViewController
-        print(1)
+        
         if segue.identifier == "cellSegue" {
-            print(2)
             let indexPath = self.tableView.indexPathForSelectedRow
             inputViewController.task = taskArray[indexPath!.row]
         } else {
-            print(3)
             let task = Task()
             task.date = NSDate()
             
@@ -136,13 +144,20 @@ class ViewController: UIViewController,UITableViewDelegate, UITableViewDataSourc
         // キーボードを閉じる
         view.endEditing(true)
     }
+    func KeyboardDidShow(notification: NSNotification) {
+        print("show")
+        keyboardShowFlag = true
+    }
+    func KeyboardDidHide(notification: NSNotification) {
+        print("false")
+        keyboardShowFlag = false
+    }
+    
     //絞り込みボタン
     @IBAction func search(sender: AnyObject) {
         let word:String! = categoryTextField.text
         taskArray = try! Realm().objects(Task).filter("category CONTAINS '"+word+"'").sorted("date", ascending: false)
-        
         tableView.reloadData()
-        
     }
     
     func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
@@ -161,8 +176,12 @@ class ViewController: UIViewController,UITableViewDelegate, UITableViewDataSourc
         categoryId = categoryIdAry[row]
         print(categoryId)
         //タスクをカテゴリで絞り込み
-        taskArray = try! Realm().objects(Task).filter("category_id == "+String(categoryId)+" ").sorted("date", ascending: false)
-        
+        if(categoryId == 0) {
+            taskArray = try! Realm().objects(Task).sorted("date", ascending: false)
+        }
+        else {
+            taskArray = try! Realm().objects(Task).filter("category_id == "+String(categoryId)+" ").sorted("date", ascending: false)
+        }
         tableView.reloadData()
     }
     func getAllCategory() {

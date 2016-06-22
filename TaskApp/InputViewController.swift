@@ -22,9 +22,10 @@ class InputViewController: UIViewController, UIPickerViewDataSource, UIPickerVie
     var categoryIdAry:[Int] = [0]
     var category_id:Int = 0
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         // 背景をタップしたらdismissKeyboardメソッドを呼ぶように設定する
         let tapGesture: UITapGestureRecognizer = UITapGestureRecognizer(target:self, action:"dismissKeyboard")
         self.view.addGestureRecognizer(tapGesture)
@@ -32,15 +33,19 @@ class InputViewController: UIViewController, UIPickerViewDataSource, UIPickerVie
         //カテゴリ一覧取得
         getAllCategory()
         
-        var pickerView = UIPickerView()
+        let pickerView = UIPickerView()
         pickerView.delegate = self
         categoryTextField.inputView = pickerView
         
         //初期値
         category_id = task.category_id
         if(category_id > 0) {
-            let categoryResult = try! Realm().objects(Category).filter("id == '"+String(category_id)+"'")
+            let categoryResult = try! Realm().objects(Category).filter("id == "+String(category_id)+"")
             categoryTextField.text = categoryResult[0].name
+            
+            //pickerviewの初期値
+            let _index:Int! = categoryIdAry.indexOf(category_id)
+            pickerView.selectRow(_index, inComponent: 0, animated: false)
         }
         
         titleTextField.text = task.title
@@ -72,7 +77,6 @@ class InputViewController: UIViewController, UIPickerViewDataSource, UIPickerVie
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
     
     func dismissKeyboard(){
         // キーボードを閉じる

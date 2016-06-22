@@ -87,7 +87,6 @@ class CategoryAddViewController: UIViewController,UITableViewDelegate, UITableVi
                 }
                 print(_category)
                 category.name = _category
-                print(123)
                 self.realm.add(category, update: true)
             }
             categoryTableView.reloadData()
