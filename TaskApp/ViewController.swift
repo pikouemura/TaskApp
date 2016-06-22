@@ -28,7 +28,9 @@ class ViewController: UIViewController,UITableViewDelegate, UITableViewDataSourc
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        
+        tableView.delegate = self
+        tableView.dataSource = self
         tableView.rowHeight = 50
         
         // 背景をタップしたらdismissKeyboardメソッドを呼ぶように設定する
@@ -38,6 +40,7 @@ class ViewController: UIViewController,UITableViewDelegate, UITableViewDataSourc
         //カテゴリ一覧取得
         getAllCategory()
         
+        //テキストフィールドを選択するとPickerView
         var pickerView = UIPickerView()
         pickerView.delegate = self
         categoryTextField.inputView = pickerView
@@ -74,6 +77,7 @@ class ViewController: UIViewController,UITableViewDelegate, UITableViewDataSourc
     // MARK: UITableViewDelegateプロトコルのメソッド
     // 各セルを選択した時に実行されるメソッド
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        print("didSelectRowAtIndexPath")
         performSegueWithIdentifier("cellSegue",sender: nil) // ←追加する
     }
     
@@ -105,11 +109,13 @@ class ViewController: UIViewController,UITableViewDelegate, UITableViewDataSourc
     // segue で画面遷移するに呼ばれる
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?){
         let inputViewController:InputViewController = segue.destinationViewController as! InputViewController
-        
+        print(1)
         if segue.identifier == "cellSegue" {
+            print(2)
             let indexPath = self.tableView.indexPathForSelectedRow
             inputViewController.task = taskArray[indexPath!.row]
         } else {
+            print(3)
             let task = Task()
             task.date = NSDate()
             

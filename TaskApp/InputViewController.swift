@@ -18,7 +18,9 @@ class InputViewController: UIViewController, UIPickerViewDataSource, UIPickerVie
     let realm = try! Realm()
     var task:Task!
     
-    var categoryAry:[String] = []
+    var categoryAry:[String] = [""]
+    var categoryIdAry:[Int] = [0]
+    var category_id:Int = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,8 +36,14 @@ class InputViewController: UIViewController, UIPickerViewDataSource, UIPickerVie
         pickerView.delegate = self
         categoryTextField.inputView = pickerView
         
+        //初期値
+        category_id = task.category_id
+        if(category_id > 0) {
+            let categoryResult = try! Realm().objects(Category).filter("id == '"+String(category_id)+"'")
+            categoryTextField.text = categoryResult[0].name
+        }
+        
         titleTextField.text = task.title
-//        categoryTextField.text = task.category
         contentsTextView.text = task.contents
         datePicker.date = task.date
         
@@ -44,11 +52,15 @@ class InputViewController: UIViewController, UIPickerViewDataSource, UIPickerVie
     
     override func viewWillDisappear(animated: Bool) {
         try! realm.write {
+            let index:Int! = categoryAry.indexOf(self.categoryTextField.text!)
+            
             self.task.title = self.titleTextField.text!
-//            self.task.category = self.categoryTextField.text!
+            self.task.category_id = self.categoryIdAry[index]
             self.task.contents = self.contentsTextView.text
             self.task.date = self.datePicker.date
             self.realm.add(self.task, update: true)
+            
+            print(self.categoryIdAry[index])
         }
         
         setNotification(task)
@@ -104,9 +116,8 @@ class InputViewController: UIViewController, UIPickerViewDataSource, UIPickerVie
     
     func getAllCategory() {
         for _category in try! Realm().objects(Category).sorted("id", ascending: false) {
-            print(categoryAry)
-            print(_category.name)
             categoryAry.append(_category.name)
+            categoryIdAry.append(_category.id)
         }
     }
 

@@ -10,7 +10,7 @@ import RealmSwift
 
 class Category: Object {
     // 管理用 ID。プライマリーキー
-    dynamic var id = 0
+    dynamic var id = 1
     
     // カテゴリー名
     dynamic var name = ""
