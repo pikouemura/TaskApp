@@ -39,6 +39,7 @@ class InputViewController: UIViewController, UIPickerViewDataSource, UIPickerVie
         
         //初期値
         category_id = task.category_id
+        
         if(category_id > 0) {
             let categoryResult = try! Realm().objects(Category).filter("id == "+String(category_id)+"")
             categoryTextField.text = categoryResult[0].name
@@ -56,6 +57,15 @@ class InputViewController: UIViewController, UIPickerViewDataSource, UIPickerVie
     }
     
     override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(animated)
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    @IBAction func addTask(sender: AnyObject) {
         try! realm.write {
             let index:Int! = categoryAry.indexOf(self.categoryTextField.text!)
             
@@ -65,17 +75,15 @@ class InputViewController: UIViewController, UIPickerViewDataSource, UIPickerVie
             self.task.date = self.datePicker.date
             self.realm.add(self.task, update: true)
             
-            print(self.categoryIdAry[index])
+            setNotification(task)
+            
+            print(4)
+            self.navigationController?.popViewControllerAnimated(true)
+            print(5)
         }
         
-        setNotification(task)
         
-        super.viewWillDisappear(animated)
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+        
     }
     
     func dismissKeyboard(){

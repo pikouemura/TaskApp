@@ -21,10 +21,13 @@ class CategoryAddViewController: UIViewController,UITableViewDelegate, UITableVi
     // 以降内容をアップデートするとリスト内は自動的に更新される。
     var categoryArray = try! Realm().objects(Category).sorted("id", ascending: false)   // ←追加
     
+    let tblBackColor: UIColor = UIColor.clearColor()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         categoryTableView.rowHeight = 50
+        categoryTableView.backgroundColor = tblBackColor
     }
     
     override func didReceiveMemoryWarning() {
@@ -42,6 +45,8 @@ class CategoryAddViewController: UIViewController,UITableViewDelegate, UITableVi
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         // 再利用可能な cell を得る
         let cell = tableView.dequeueReusableCellWithIdentifier("categoryCell", forIndexPath: indexPath)
+        
+        cell.backgroundColor = tblBackColor
         
         // Cellに値を設定する.
         let category = categoryArray[indexPath.row]

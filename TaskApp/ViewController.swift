@@ -29,12 +29,15 @@ class ViewController: UIViewController,UITableViewDelegate, UITableViewDataSourc
     // 以降内容をアップデートするとリスト内は自動的に更新される。
     var taskArray = try! Realm().objects(Task).sorted("date", ascending: false)   // ←追加
     
+    let tblBackColor: UIColor = UIColor.clearColor()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         tableView.delegate = self
         tableView.dataSource = self
         tableView.rowHeight = 50
+        tableView.backgroundColor = tblBackColor
         
         
         //キーボードの開閉イベント取得
@@ -70,7 +73,7 @@ class ViewController: UIViewController,UITableViewDelegate, UITableViewDataSourc
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         // 再利用可能な cell を得る
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
-        
+        cell.backgroundColor = tblBackColor
         // Cellに値を設定する.
         let task = taskArray[indexPath.row]
         cell.textLabel?.text = task.title
@@ -81,12 +84,16 @@ class ViewController: UIViewController,UITableViewDelegate, UITableViewDataSourc
         let dateString:String = formatter.stringFromDate(task.date)
         cell.detailTextLabel?.text = dateString
         
-        return cell    }
+        return cell
+    }
     
     // MARK: UITableViewDelegateプロトコルのメソッド
     // 各セルを選択した時に実行されるメソッド
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        if(!keyboardShowFlag) {
+        if(keyboardShowFlag) {
+            tableView.deselectRowAtIndexPath(indexPath, animated: false)
+        }
+        else {
             performSegueWithIdentifier("cellSegue",sender: nil) // ←追加する
         }
     }
