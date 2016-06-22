@@ -77,13 +77,8 @@ class InputViewController: UIViewController, UIPickerViewDataSource, UIPickerVie
             
             setNotification(task)
             
-            print(4)
             self.navigationController?.popViewControllerAnimated(true)
-            print(5)
         }
-        
-        
-        
     }
     
     func dismissKeyboard(){
